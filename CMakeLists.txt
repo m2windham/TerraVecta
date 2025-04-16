@@ -143,7 +143,7 @@ add_executable(TerraVectaTests
 target_sources(TerraVectaTests PRIVATE
     src/Application.cpp
     src/Window.cpp
-    src/VoxelChunk.h
+    src/include/VoxelChunk.h
     src/VoxelChunk.cpp # Add VoxelChunk.cpp to the test executable
 )
 
