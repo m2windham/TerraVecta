@@ -173,8 +173,8 @@ bool Application::initialize() {
     try {
         // Ensure paths are correct relative to the executable's working directory
         m_ShaderProgram = std::make_unique<Shader>(
-            "../../../shaders/simp.vert",
-            "../../../shaders/simple.frag"
+            "shaders/simp.vert",
+            "shaders/simple.frag"
         );
 
         if (!m_ShaderProgram || m_ShaderProgram->getID() == 0) {

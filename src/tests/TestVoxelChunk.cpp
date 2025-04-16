@@ -1,5 +1,5 @@
 #include "catch.hpp"
-#include "../VoxelChunk.h"
+#include "include/VoxelChunk.h"
 
 TEST_CASE("VoxelChunk generates terrain correctly", "[VoxelChunk]") {
     VoxelChunk chunk(16);
