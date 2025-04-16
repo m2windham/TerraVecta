@@ -1,0 +1,87 @@
+# Build directories
+build/
+out/
+cmake-build-*/
+bin/
+lib/
+x64/
+Debug/
+Release/
+
+# CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+DartConfiguration.tcl
+Testing/
+install_manifest.txt
+compile_commands.json
+_deps/
+
+# Visual Studio files
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.suo
+*.user
+*.userosscache
+*.sdf
+*.opensdf
+*.opendb
+*.VC.db
+*.VC.VC.opendb
+ipch/
+.vscode/
+*.code-workspace
+
+# Compiled files
+*.exe
+*.dll
+*.so
+*.dylib
+*.lib
+*.a
+*.pdb
+*.ilk
+*.exp
+*.obj
+*.o
+*.lo
+*.la
+*.lai
+*.class
+*.com
+*.manifest
+*.res
+*.log
+
+# Visual Studio IntelliSense
+*.ipch
+*.ncb
+*.opendb
+*.cachefile
+*.VC.db
+*.VC.VC.opendb
+
+# Generated documentation
+doc/
+docs/build/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.swp
+*.swo
+
+# Backup and temporary files
+*.bak
+*.tmp
+*~
+*#
+.#*
