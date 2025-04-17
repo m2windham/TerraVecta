@@ -22,6 +22,8 @@
 #include <optional>
 #include <cmath>
 #include <limits>
+#include <filesystem>
+namespace fs = std::filesystem;
 
 // --- Include Actual Game System Headers ---
 #include "include/Inventory.h"
@@ -34,7 +36,7 @@
 #include <bullet/Bullet3Collision/NarrowPhaseCollision/b3ConvexUtility.h>
 
 // --- OpenGL Error Checking Utility ---
-GLenum glCheckError_(const char *file, int line) {
+GLenum glCheckErrorUnique(const char *file, int line) {
     GLenum errorCode;
     // Loop while there are errors to fetch
     while ((errorCode = glGetError()) != GL_NO_ERROR) {
@@ -55,7 +57,7 @@ GLenum glCheckError_(const char *file, int line) {
     return errorCode; // Returns GL_NO_ERROR if everything was okay
 }
 // Macro to automatically insert file and line number into the error check call
-#define glCheckError() glCheckError_(__FILE__, __LINE__)
+#define glCheckError() glCheckErrorUnique(__FILE__, __LINE__)
 
 
 // Definition moved before initialize
@@ -161,6 +163,9 @@ Application::~Application() {
 // --- initialize ---
 // Sets up OpenGL state, loads shaders, creates geometry (VAO/VBO).
 bool Application::initialize() {
+    // Log the current working directory at the start
+    std::cout << "Current Working Directory: " << fs::current_path() << std::endl;
+
     // Set initial OpenGL state for 3D Voxel Scene
     glClearColor(0.1f, 0.1f, 0.15f, 1.0f); // Dark grey-blue background
     glEnable(GL_DEPTH_TEST); // Enable depth testing for 3D
@@ -235,11 +240,22 @@ bool Application::initialize() {
     // --- Initialize Texture Atlas ---
     std::cout << "Initializing Texture Atlas..." << std::endl;
     m_textureAtlas = std::make_unique<TextureAtlas>();
-    
-    if (!m_textureAtlas->initialize("../../../assets/textures/block_atlas.png", 16)) {
+
+    // Update file paths to use the base directory
+    std::string blockAtlasPath = "assets/textures/block_atlas.png";
+    std::string grassTexturePath = "assets/textures/grass.png";
+
+    // Add debug logs to verify file existence
+    if (!fs::exists(blockAtlasPath)) {
+        std::cerr << "ERROR: File not found: " << blockAtlasPath << std::endl;
+    }
+    if (!fs::exists(grassTexturePath)) {
+        std::cerr << "ERROR: File not found: " << grassTexturePath << std::endl;
+    }
+
+    if (!m_textureAtlas->initialize(blockAtlasPath.c_str(), 16)) {
         std::cerr << "WARNING: Failed to load texture atlas, falling back to single texture" << std::endl;
-        // Fall back to the old texture loading method
-        m_textureID = loadTexture("../../../assets/textures/grass.png");
+        m_textureID = loadTexture(grassTexturePath.c_str());
     } else {
         // Register block types with their textures
         // Format: blockType, {top, bottom, left, right, front, back} indices in the atlas
@@ -283,10 +299,10 @@ bool Application::initialize() {
     // --- Final Setup ---
     m_LastFrameTime = static_cast<float>(glfwGetTime()); // Initialize frame timer
 
-    // Load texture using the correct relative path
-    m_textureID = loadTexture("../../../assets/textures/grass.png"); // Store texture ID
+    /*
+    m_textureID = loadTexture(grassTexturePath.c_str()); // Store texture ID
     if (m_textureID == 0) {
-        std::cerr << "ERROR::APPLICATION::INITIALIZE: Failed to load texture '../../../assets/textures/grass.png'." << std::endl;
+        std::cerr << "ERROR::APPLICATION::INITIALIZE: Failed to load texture '" << grassTexturePath << "'." << std::endl;
         
         // Create a default texture if loading fails
         glGenTextures(1, &m_textureID);
@@ -307,7 +323,7 @@ bool Application::initialize() {
          std::cout << "Texture loaded successfully (ID: " << m_textureID << ")" << std::endl;
     }
     glCheckError();
-
+    */
 
     // Bind the texture and set uniform (can be done once if only one texture unit is used)
     if (m_ShaderProgram && m_textureID != 0) {
@@ -412,6 +428,9 @@ void Application::processInput(float deltaTime) {
 
     m_cameraYaw += xoffset;
     m_cameraPitch += yoffset;
+
+    // Add debug logs to verify mouse input and offsets
+    std::cout << "Mouse X Position: " << xpos << ", Last Mouse X: " << m_lastMouseX << ", X Offset: " << xoffset << std::endl;
 
     // Clamp pitch
     m_cameraPitch = std::clamp(m_cameraPitch, -89.0f, 89.0f);

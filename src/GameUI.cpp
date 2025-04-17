@@ -7,6 +7,8 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include <filesystem> // For checking file existence
+namespace fs = std::filesystem;
 
 GameUI::GameUI()
     : m_application(nullptr), m_quadVAO(0), m_quadVBO(0), 
@@ -24,10 +26,21 @@ GameUI::~GameUI() {
 }
 
 bool GameUI::initialize() {
-    // Create UI shader
+    // Update shader file paths to be relative to the executable
+    std::string vertexShaderPath = "shaders/ui.vert";
+    std::string fragmentShaderPath = "shaders/ui.frag";
+
+    // Add debug logs to verify file existence using relative paths
+    if (!fs::exists(vertexShaderPath)) {
+        std::cerr << "ERROR: File not found at relative path: " << vertexShaderPath << std::endl;
+    }
+    if (!fs::exists(fragmentShaderPath)) {
+        std::cerr << "ERROR: File not found at relative path: " << fragmentShaderPath << std::endl;
+    }
+
+    // Create UI shader using relative paths
     try {
-        // Use absolute paths from the executable's working directory
-        m_uiShader = std::make_unique<Shader>("../../../shaders/ui.vert", "../../../shaders/ui.frag");
+        m_uiShader = std::make_unique<Shader>(vertexShaderPath.c_str(), fragmentShaderPath.c_str());
     } catch (const std::exception& e) {
         std::cerr << "Failed to load UI shaders: " << e.what() << std::endl;
         return false;

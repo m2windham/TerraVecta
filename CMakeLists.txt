@@ -9,6 +9,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Suppress deprecation warning for <experimental/filesystem>
+add_definitions(-D_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING)
+
 # Set the default build type to Release if not specified
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
@@ -56,6 +59,10 @@ endif()
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/Bullet/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/Bullet/include/bullet)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs/Bullet/include/bullet/LinearMath)
+
+# Add include directories for assets and shaders
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/assets)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/shaders)
 
 # --- Add GLAD Source ---
 #set(GLAD_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/glad.c)
@@ -107,14 +114,17 @@ target_link_libraries(TerraVecta PRIVATE
 # Removed the add_subdirectory command for FastNoise as it does not contain a CMakeLists.txt file
 # add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs/FastNoise)
 
-# Ensure shader files are copied to the build directory
-file(COPY ${CMAKE_SOURCE_DIR}/shaders DESTINATION ${CMAKE_BINARY_DIR})
+# Set output directory for executables explicitly for clarity
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR})
 
-# Copy assets directory to the build output directory
-file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
-
-# Optional: Set output directories for executables
-# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+# Add custom commands to copy assets and shaders after the build
+add_custom_command(TARGET TerraVecta POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/shaders" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/shaders"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/assets" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets"
+    COMMENT "Copying assets and shaders to output directory"
+)
 
 # Optional: Print message during configuration
 message(STATUS "Configuring TerraVecta project...")
@@ -159,6 +169,15 @@ target_sources(TerraVectaTests PRIVATE
     src/WaterSystem.cpp
     src/GameUI.cpp
     src/Biome.cpp
+)
+
+# Add the custom command for TerraVectaTests *after* it's defined
+add_custom_command(TARGET TerraVectaTests POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/shaders" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/shaders"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/assets" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets"
+    COMMENT "Copying assets and shaders to test output directory"
 )
 
 # Add Catch2 as an external library
